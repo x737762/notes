@@ -1,7 +1,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const url = require('node:url');
-const baseUrl = 'https://github.com/x737762/notes/blob/main/';
+let baseUrl = '';
+
+const gitUrl = {
+  gitea: 'http://192.168.31.14:3000/beizong/notes/src/branch/main/',
+  github: 'https://github.com/x737762/notes/blob/main/',
+};
 
 const fileTree = [];
 
@@ -46,8 +51,7 @@ async function fetchFileTree(tree = [], root, basePath) {
       const stat = await fs.statSync(path.resolve(root, basePath, item));
       if (stat.isDirectory()) {
         const data = {
-          path:
-            basePath === './' ? `${basePath}${item}` : `${basePath}/${item}`,
+          path: basePath === './' ? `${basePath}${item}` : `${basePath}/${item}`,
           name: item,
           type: 'dir',
           children: [],
@@ -56,8 +60,7 @@ async function fetchFileTree(tree = [], root, basePath) {
         await fetchFileTree(data.children, root, data.path);
       } else {
         tree.push({
-          path:
-            basePath === './' ? `${basePath}${item}` : `${basePath}/${item}`,
+          path: basePath === './' ? `${basePath}${item}` : `${basePath}/${item}`,
           name: item,
           type: 'file',
         });
@@ -66,17 +69,21 @@ async function fetchFileTree(tree = [], root, basePath) {
   }
 }
 
-async function pushGit() {
+async function pushGit(remote) {
   const { execSync } = require('node:child_process');
   const date = new Date().toLocaleString().replaceAll('/', '-');
   console.log(await execSync('git pull', { encoding: 'utf-8' }));
   console.log(await execSync('git add .', { encoding: 'utf-8' }));
   console.log(await execSync(`git commit -m "${date}"`, { encoding: 'utf-8' }));
-  console.log(await execSync('git push', { encoding: 'utf-8' }));
+  console.log(await execSync(`git push ${remote}`, { encoding: 'utf-8' }));
 }
 
 (async () => {
-  await fetchFileTree(fileTree, root, './');
-  await createReadme(fileTree);
-  await pushGit();
+  for (const key in gitUrl) {
+    baseUrl = gitUrl[key];
+
+    await fetchFileTree(fileTree, root, './');
+    await createReadme(fileTree);
+    await pushGit(key);
+  }
 })();
