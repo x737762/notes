@@ -10,7 +10,7 @@ const gitUrl = {
 
 const fileTree = [];
 
-const exclud = ['.git', 'script.js', 'images', 'README.md'];
+const exclud = ['.git', 'script.js', 'images', 'README.md', 'assets'];
 const root = path.resolve(__dirname, './');
 
 const readme = path.resolve(__dirname, './README.md');
