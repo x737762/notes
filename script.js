@@ -8,7 +8,7 @@ const gitUrl = {
   github: 'https://github.com/x737762/notes/blob/main/',
 };
 
-const fileTree = [];
+let fileTree = [];
 
 const exclud = ['.git', 'script.js', 'images', 'README.md', 'assets'];
 const root = path.resolve(__dirname, './');
@@ -81,7 +81,7 @@ async function pushGit(remote) {
 (async () => {
   for (const key in gitUrl) {
     baseUrl = gitUrl[key];
-
+    fileTree = []
     await fetchFileTree(fileTree, root, './');
     await createReadme(fileTree);
     await pushGit(key);
